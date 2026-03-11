@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARM Core Conqueror 9000</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Roboto Mono', 'monospace'],
+                    },
+                    colors: {
+                        darkbg: '#0B1121',
+                        darkcard: '#151E32',
+                        nexus: '#00F0FF',
+                        neon: '#10B981',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-darkbg text-gray-200 font-sans min-h-screen p-6 relative overflow-x-hidden">
+    <!-- Background Glow Elements -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-neon/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <header class="mb-4 flex items-center justify-between z-10 relative mt-4">
+        <h1 class="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+            <span
+                class="w-8 h-8 rounded bg-gradient-to-br from-neon to-blue-500 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+            </span>
+            ARM Core Conqueror 9000
+        </h1>
+        <div class="text-sm font-mono text-gray-400 bg-darkcard px-4 py-2 rounded-full border border-gray-800">
+            SYSTEM STATUS: <span id="systemStatusText" class="text-neon font-bold animate-pulse">ONLINE</span>
+        </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <div class="flex justify-center mb-8 relative z-10 border-b border-gray-800 pb-px">
+        <div class="flex space-x-8">
+            <button id="tabDashboard"
+                class="text-neon border-b-2 border-neon pb-2 font-medium tracking-wide transition-all">Dashboard</button>
+            <button id="tabDoc"
+                class="text-gray-400 border-b-2 border-transparent hover:text-gray-200 pb-2 font-medium tracking-wide transition-all">System
+                Documentation</button>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD VIEW -->
+    <main id="dashboardView" class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 w-full max-w-7xl mx-auto">
+
+        <!-- Left Panel: Controls -->
+        <div class="col-span-1 lg:col-span-3 glass-panel p-6 rounded-2xl flex flex-col gap-6">
+            <h2 class="text-lg font-semibold border-b border-gray-700 pb-2">Simulation Parameters</h2>
+
+            <div class="flex flex-col gap-2">
+                <label
+                    class="text-sm text-gray-400 font-medium tooltip-container tooltip-left cursor-help w-fit border-b border-dashed border-gray-600 pb-0.5">
+                    M Cores
+                    <span class="tooltip-box">The number of active processing units. More cores allow more tasks to run
+                        in parallel.</span>
+                </label>
+                <input type="number" id="numCores" value="4" min="1" max="16"
+                    class="bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon text-white font-mono transition-all">
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label
+                    class="text-sm text-gray-400 font-medium tooltip-container tooltip-left cursor-help w-fit border-b border-dashed border-gray-600 pb-0.5">
+                    Frequency Target
+                    <span class="tooltip-box">The speed (f) of the processor. Higher speed reduces time but increases
+                        battery drain exponentially.</span>
+                </label>
+                <div class="flex flex-col gap-3">
+                    <div class="flex flex-col">
+                        <div class="flex justify-between text-xs text-gray-400 mb-1">
+                            <span>Min</span>
+                            <span id="freqMinVal" class="text-neon font-mono">1.0</span>
+                        </div>
+                        <input type="range" id="freqMin" value="1.0" min="1.0" max="5.0" step="0.1"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-neon">
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex justify-between text-xs text-gray-400 mb-1">
+                            <span>Max</span>
+                            <span id="freqMaxVal" class="text-neon font-mono">4.5</span>
+                        </div>
+                        <input type="range" id="freqMax" value="4.5" min="1.0" max="5.0" step="0.1"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-neon">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label
+                    class="text-sm text-gray-400 font-medium tooltip-container tooltip-left cursor-help w-fit border-b border-dashed border-gray-600 pb-0.5">
+                    Compute Units
+                    <span class="tooltip-box">The 'size' of the task. For example, a 50-unit task takes twice as long as
+                        a 25-unit task.</span>
+                </label>
+                <textarea id="taskInputs" rows="4"
+                    class="bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon text-white font-mono text-sm leading-relaxed transition-all resize-none"
+                    placeholder="e.g. 50, 20, 30.5, 10, 80, 45">10.5, 25.0, 8.2, 15.7, 30.1, 4.5, 12.0, 21.4, 18.9, 7.3</textarea>
+            </div>
+
+            <div class="flex gap-4">
+                <div class="flex flex-col gap-2 w-1/2">
+                    <label
+                        class="text-sm text-gray-400 font-medium tooltip-container tooltip-left cursor-help w-fit border-b border-dashed border-gray-600 pb-0.5">
+                        Alpha (α)
+                        <span id="alphaTooltip" class="tooltip-box">A constant representing the heat sensitivity of the
+                            chip. Higher alpha
+                            means power costs rise faster.</span>
+                    </label>
+                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Value</span>
+                        <span id="alphaVal" class="text-neon font-mono">1.5</span>
+                    </div>
+                    <input type="range" id="alpha" value="1.5" min="0.1" max="3.0" step="0.1"
+                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-neon">
+                </div>
+
+                <div class="flex flex-col gap-2 w-1/2">
+                    <label
+                        class="text-sm text-gray-400 font-medium tooltip-container tooltip-left cursor-help w-fit border-b border-dashed border-gray-600 pb-0.5">
+                        Beta (β)
+                        <span id="betaTooltip" class="tooltip-box">A constant representing processing efficiency. It
+                            converts frequency
+                            into actual work done.</span>
+                    </label>
+                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Value</span>
+                        <span id="betaVal" class="text-neon font-mono">0.8</span>
+                    </div>
+                    <input type="range" id="beta" value="0.8" min="0.1" max="2.0" step="0.1"
+                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-neon">
+                </div>
+            </div>
+
+            <!-- Task Dependencies Toggle -->
+            <label class="inline-flex items-center cursor-pointer mt-2 w-fit">
+                <input type="checkbox" id="taskDependencies" class="sr-only peer">
+                <div
+                    class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all border-gray-600 peer-checked:bg-neon shadow-[0_0_10px_rgba(16,185,129,0.2)] peer-checked:shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                </div>
+                <span class="ms-3 text-sm font-medium text-gray-300">Enable Task Dependencies</span>
+            </label>
+
+            <div class="flex gap-3 mt-2">
+                <button id="runBtn"
+                    class="flex-1 text-white bg-neon hover:bg-emerald-400 font-medium rounded-lg text-sm px-4 py-3 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] flex justify-center items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    RUN
+                </button>
+                <button id="reportBtn"
+                    class="flex-1 text-gray-300 bg-gray-800 border border-gray-600 hover:bg-gray-700 hover:text-white font-medium rounded-lg text-sm px-4 py-3 transition-colors flex justify-center items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                        </path>
+                    </svg>
+                    REPORT
+                </button>
+            </div>
+        </div>
+
+        <!-- Center Panel: Visualization -->
+        <div class="col-span-1 lg:col-span-6 glass-panel p-6 rounded-2xl flex flex-col">
+            <div class="flex justify-between items-end border-b border-gray-700 pb-2 mb-6">
+                <h2 class="text-lg font-semibold">Core Activity Visualizer</h2>
+                <span class="text-xs font-mono text-neon border border-neon/30 bg-neon/10 px-2 py-1 rounded">ALGORITHM:
+                    GREEDY LPT</span>
+            </div>
+
+            <div id="coreContainer"
+                class="flex-grow flex flex-col justify-center gap-6 overflow-y-auto pr-2 custom-scrollbar">
+                <!-- Tracks will be injected here via JS -->
+                <div class="text-center text-gray-500 flex flex-col items-center justify-center h-full gap-3">
+                    <svg class="w-12 h-12 text-gray-600 animate-pulse" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                        </path>
+                    </svg>
+                    Awaiting Simulation Input
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Metrics & Analytics -->
+        <div class="col-span-1 lg:col-span-3 flex flex-col gap-6">
+
+            <!-- Comparison Dashboard (Before vs. After) -->
+            <div class="glass-panel p-5 rounded-2xl flex flex-col">
+                <h3 class="text-sm text-gray-300 font-semibold mb-3 border-b border-gray-700/50 pb-2">Comparison
+                    Overview</h3>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <!-- Baseline -->
+                    <div class="bg-red-900/20 border border-red-500/20 rounded-xl p-3 text-center">
+                        <span class="text-[10px] text-red-400 font-bold uppercase block mb-1">Baseline
+                            (@4.5GHz)</span>
+                        <div class="text-xs text-gray-400 mb-1">Energy: <span class="text-white font-mono"
+                                id="baseEnergy">--</span> J</div>
+                        <div class="text-xs text-gray-400">EDP: <span class="text-white font-mono"
+                                id="baseEdp">--</span></div>
+                    </div>
+                    <!-- Optimized -->
+                    <div class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-3 text-center">
+                        <span class="text-[10px] text-emerald-400 font-bold uppercase block mb-1">Optimized</span>
+                        <div class="text-xs text-gray-400 mb-1">Energy: <span class="text-white font-mono"
+                                id="optEnergy">--</span> J</div>
+                        <div class="text-xs text-gray-400">EDP: <span class="text-white font-mono" id="optEdp">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-900/50 rounded p-2 text-center border border-gray-700">
+                    <span class="text-sm font-bold text-neon" id="efficiencyGain">Total Energy Efficiency Gain:
+                        --%</span>
+                </div>
+            </div>
+
+            <!-- Current Metrics Cards (existing) -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass-panel p-4 rounded-xl text-center">
+                    <h3 class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Total Time</h3>
+                    <p id="totalTime" class="text-2xl font-bold text-white font-mono">0.00 <span
+                            class="text-sm text-gray-500 font-sans">cyc</span></p>
+                </div>
+                <div class="glass-panel p-4 rounded-xl text-center">
+                    <h3 class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Opt. Freq</h3>
+                    <p id="optimalFreq" class="text-2xl font-bold text-nexus font-mono">0.00 <span
+                            class="text-sm text-nexus/50 font-sans">GHz</span></p>
+                </div>
+                <div class="glass-panel p-4 rounded-xl text-center">
+                    <h3 class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Energy</h3>
+                    <p id="energyVal" class="text-2xl font-bold text-neon font-mono">0.0 <span
+                            class="text-sm text-neon/50 font-sans">J</span></p>
+                </div>
+                <div class="glass-panel p-4 rounded-xl text-center">
+                    <h3
+                        class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider tooltip-container cursor-help w-fit mx-auto border-b border-dashed border-gray-600 pb-0.5">
+                        EDP
+                        <span class="tooltip-box">Energy-Delay Product. This is our 'Efficiency Score'. A lower
+                            score
+                            means a better balance of speed and battery.</span>
+                    </h3>
+                    <p id="edpVal" class="text-2xl font-bold text-[#b084f5] font-mono">0.0</p>
+                </div>
+            </div>
+
+            <!-- Power/Freq Chart -->
+            <div class="glass-panel p-5 rounded-2xl flex-grow flex flex-col min-h-[150px]">
+                <h3 class="text-sm text-gray-300 font-semibold mb-3 border-b border-gray-700/50 pb-2">Power vs
+                    Frequency
+                </h3>
+                <div class="relative w-full h-full min-h-[120px]">
+                    <canvas id="energyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Workload Scalability Chart -->
+            <div class="glass-panel p-5 rounded-2xl flex-grow flex flex-col min-h-[150px]">
+                <h3 class="text-sm text-gray-300 font-semibold mb-3 border-b border-gray-700/50 pb-2">Workload
+                    Scalability
+                </h3>
+                <div class="relative w-full h-full min-h-[120px]">
+                    <canvas id="scalabilityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- LIVE DOCUMENTATION VIEW -->
+    <main id="docView" class="hidden relative z-10 w-full max-w-7xl mx-auto pb-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Gantt Scheduling Logic -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col relative logic-card">
+                <div class="formula-icon">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    <div class="formula-tooltip-box">
+                        <span class="formula-label">LPT Scheduling Heuristic</span>
+                        <div class="latex-math">\min \{ \max_{j} \sum_{i \in S_j} w_i \}</div>
+                    </div>
+                </div>
+                <h2 class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Gantt Scheduling Logic
+                </h2>
+                <div class="text-2xl font-bold text-white mb-3" id="docGanttLogic">Greedy LPT Active</div>
+                <div
+                    class="bg-gray-900/40 rounded-lg p-3 text-gray-400 leading-relaxed text-sm border border-gray-800/50">
+                    <span class="text-neon font-bold">The "Why":</span>
+                    The system implements the <span class="text-gray-200">Longest Processing Time (LPT)</span>
+                    algorithm. By sorting tasks from largest to smallest, we front-load the most demanding workloads.
+                    This prevents "bottleneck tasks" from being left for the end, which is the primary cause of core
+                    idling in standard FIFO schedulers.
+                </div>
+            </div>
+
+            <!-- Thermal Safety Status -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col relative logic-card">
+                <div class="formula-icon">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <div class="formula-tooltip-box">
+                        <span class="formula-label">Heat Dissipation Index</span>
+                        <div class="latex-math">H = w \cdot e^{\alpha \cdot f}</div>
+                    </div>
+                </div>
+                <h2 class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Thermal Safety Status</h2>
+                <div class="text-2xl font-bold text-emerald-400 mb-3" id="docThermalValue">-- °C (Safe)</div>
+                <div
+                    class="bg-gray-900/40 rounded-lg p-3 text-gray-400 leading-relaxed text-sm border border-gray-800/50">
+                    <span class="text-neon font-bold">The "Why":</span>
+                    Thermal stress is calculated using the <span class="text-gray-200">Alpha (α) coefficient</span>.
+                    Since heat increases exponentially with frequency (f), the system monitors real-time dissipation. If
+                    the estimated heat ratio exceeds safe thresholds, the status flips to 'WARNING' to prevent permanent
+                    silicon degradation.
+                </div>
+            </div>
+
+            <!-- Efficiency Gain -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col relative logic-card">
+                <div class="formula-icon">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                    <div class="formula-tooltip-box">
+                        <span class="formula-label">Efficiency Delta</span>
+                        <div class="latex-math">\Delta = \frac{T_{FIFO} - T_{LPT}}{T_{FIFO}}</div>
+                    </div>
+                </div>
+                <h2 class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Efficiency Gain</h2>
+                <div class="text-2xl font-bold text-neon mb-3 font-mono" id="docLptEfficiency">-- % Gain</div>
+                <div
+                    class="bg-gray-900/40 rounded-lg p-3 text-gray-400 leading-relaxed text-sm border border-gray-800/50">
+                    <span class="text-neon font-bold">The "Why":</span>
+                    This value represents the <span class="text-gray-200">Workload Balance Efficiency</span>. It
+                    compares our LPT results against a naive FIFO scheduler. The gain exists because we've minimized the
+                    "empty space" (idle time) on some cores while others are still running, ensuring all M Cores finish
+                    as close to each other as possible.
+                </div>
+            </div>
+
+            <!-- Power Law Compliance -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col relative logic-card">
+                <div class="formula-icon">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 4a2 2 0 114 0v1a2 2 0 01-2 2H3m2 0h14a2 2 0 012 2v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z">
+                        </path>
+                    </svg>
+                    <div class="formula-tooltip-box">
+                        <span class="formula-label">Power & EDP Laws</span>
+                        <div class="latex-math">P = M \cdot e^{\alpha \cdot f}, \text{EDP} = E \cdot T</div>
+                    </div>
+                </div>
+                <h2 class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Power Law Compliance</h2>
+                <div class="text-2xl font-bold text-[#b084f5] mb-3 font-mono" id="docPowerValue">-- Watts</div>
+                <div
+                    class="bg-gray-900/40 rounded-lg p-3 text-gray-400 leading-relaxed text-sm border border-gray-800/50">
+                    <span class="text-neon font-bold">The "Why":</span>
+                    Processor power consumption follows an <span class="text-gray-200">Exponential Penalty</span> curve.
+                    By choosing an optimal frequency (f), we minimize the <span class="text-gray-200">Energy-Delay
+                        Product (EDP)</span>, avoiding the vertical climb in power usage where battery drain triples for
+                    only a marginal gain in clock speed.
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

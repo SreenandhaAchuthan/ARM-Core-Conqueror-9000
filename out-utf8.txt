@@ -1,0 +1,19 @@
+﻿Successfully initialized 4 ARM cores.
+Read 10 tasks from 'tasks.txt'.
+
+--- Scheduling Summary (Longest Processing Time) ---
+Core 1 Total Load: 38.30
+  => Tasks: [Task 5: 30.10] [Task 3: 8.20] 
+
+Core 2 Total Load: 35.50
+  => Tasks: [Task 2: 25.00] [Task 1: 10.50] 
+
+Core 3 Total Load: 40.70
+  => Tasks: [Task 8: 21.40] [Task 7: 12.00] [Task 10: 7.30] 
+
+Core 4 Total Load: 39.10
+  => Tasks: [Task 9: 18.90] [Task 4: 15.70] [Task 6: 4.50] 
+
+----------------------------------------------------
+Maximum Load (Bottleneck): 40.70 on Core 3
+Total Execution Time: 40.70 units
